@@ -7,93 +7,149 @@ import {
   Dimensions,
   Animated,
   Easing,
+  TouchableWithoutFeedback,
 } from 'react-native';
-import {get} from 'lodash';
+import {connect} from 'react-redux';
+import {get, isequal} from 'lodash';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Icon2 from 'react-native-vector-icons/Entypo';
+import {trueIcon, falseIcon} from '../assets/icons';
+import Timerr from '../components/timer';
 
-const trueIcon = <Icon name="checkmark" size={30} color="#000" />;
-const falseIcon = <Icon2 name="cross" size={30} color="#000" />;
-
-const QuizScreen = () => {
+const QuizScreen = ({
+  navigation,
+  category,
+  level,
+  saveQuestions,
+  saveResult,
+  saveSubmittedAnswer,
+}) => {
   const ref = useRef();
   const [questions, setQuestions] = useState([]);
+  const [submittedAnswers, setSubmittedAnswers] = useState([]);
+  const [total, setTotal] = useState(0);
   const [bgColor, setbgColor] = useState('#003366');
-  const x = new Animated.Value(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [animation, setAnimation] = useState(new Animated.Value(0));
+  const [time, setTime] = useState(10);
+  const [refresh, setRefresh] = useState(false);
+
   useEffect(() => {
     getQuestions();
   }, []);
 
   const getQuestions = async () => {
     try {
-      let response = await fetch(
-        'https://opentdb.com/api.php?amount=10&difficulty=easy&type=boolean',
-      );
+      let url = category
+        ? `https://opentdb.com/api.php?amount=10&category=${category}&difficulty=${level}&type=boolean`
+        : `https://opentdb.com/api.php?amount=10&difficulty=${level}&type=boolean`;
+
+      let response = await fetch(url);
       let resp = await response.json();
       setQuestions(get(resp, 'results'));
+      saveQuestions(get(resp, 'results'));
     } catch (error) {
       console.error(error);
     }
   };
 
-  const renderItem = ({item, index}) => {
-    var bgcolor = x.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['#003366', 'green'],
+  useEffect(() => {
+    saveResult(total);
+  }, [total]);
+
+  useEffect(() => {
+    saveSubmittedAnswer(submittedAnswers);
+    // ref.current.snapToNext();
+  }, [submittedAnswers]);
+
+  const validateAnswer = (answer, index) => {
+    setSubmittedAnswers([...submittedAnswers, {index, answer}]);
+    if (answer === questions[index].correct_answer.toLowerCase()) {
+      setTotal(total + 1);
+    }
+    if (index + 1 === questions.length) {
+      navigation.navigate('ResultScreen');
+    }
+  };
+
+  const abcd = (index) => {
+    setCurrentIndex(index);
+    setTime(10);
+  };
+
+  const handleAnimation = (color) => {
+    setbgColor(color);
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 1000,
+    }).start(() => {
+      ref.current.snapToNext();
+      animation.setValue(0);
+      // Animated.timing(animation, {
+      //   toValue: 0,
+      //   duration: 1000,
+      // }).start(() => {
+      //   ref.current.snapToNext();
+      // });
     });
+  };
+
+  const boxInterpolation = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#003366', bgColor],
+  });
+
+  console.log('##test', currentIndex, get(ref, 'current.currentIndex'));
+  const animatedStyle = {
+    backgroundColor: boxInterpolation,
+  };
+
+  const handleTimerOver = () => {
+    console.log('##handleTimerOver');
+    ref.current.snapToNext();
+    setTime(20);
+  };
+  const renderItem = ({item, index}) => {
     return (
-      <Animated.View
-        style={[
-          styles.slide,
-          {
-            backgroundColor: bgcolor,
-          },
-        ]}>
+      <Animated.View style={{...styles.slide, ...animatedStyle}}>
         <View style={styles.questionContainer}>
           <View style={styles.questionCategory}>
             <Text style={styles.categoryTitle}>{item.category}</Text>
+            <Text style={styles.categoryTitle}>{item.correct_answer}</Text>
+            <Text style={styles.categoryTitle}>{item.difficulty}</Text>
           </View>
           <View style={styles.questionTitle}>
-            <Text style={styles.title}>{item.question}</Text>
+            <Text style={styles.title}>
+              {unescape(item.question.replace(/(&quot\;)/g, '"'))}
+            </Text>
           </View>
         </View>
         <View style={styles.buttons}>
           <TouchableOpacity
             style={styles.falseButton}
             onPress={() => {
-              setbgColor('lightcoral');
-              Animated.timing(x, {
-                toValue: 1,
-                duration: 500,
-                easing: Easing.linear,
-                useNativeDriver: false,
-              }).start(({finished}) => {
-                if (finished) {
-                  ref.current.snapToNext();
-                }
-              });
+              handleAnimation('lightcoral');
+              validateAnswer('false', index);
             }}>
             {falseIcon}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.trueButton}
             onPress={() => {
-              setbgColor('lightgreen');
-              Animated.timing(x, {
-                toValue: 1,
-                duration: 500,
-                easing: Easing.linear,
-                useNativeDriver: false,
-              }).start(({finished}) => {
-                if (finished) {
-                  ref.current.snapToNext();
-                }
-              });
+              handleAnimation('lightgreen');
+              validateAnswer('true', index);
             }}>
             {trueIcon}
           </TouchableOpacity>
         </View>
+        {/* <View>
+          <Timerr
+            question={item}
+            index={index}
+            q={questions[currentIndex]}
+            time={time}
+            over={handleTimerOver}
+          />
+        </View> */}
       </Animated.View>
     );
   };
@@ -107,13 +163,56 @@ const QuizScreen = () => {
         renderItem={renderItem}
         sliderWidth={Dimensions.get('window').width}
         itemWidth={300}
-        // onSnapToItem={(index) => abcdFunc(index)}
+        onSnapToItem={(index) => abcd(index)}
       />
     </View>
   );
 };
 
+const mapStateToProps = (state) => {
+  return {
+    total: state.total,
+    questions: state.questions,
+    answers: state.submittedAnswers,
+    category: state.category,
+    level: state.level,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    saveQuestions: (payload) =>
+      dispatch({
+        type: 'QUESTION',
+        payload: payload,
+      }),
+    saveSubmittedAnswer: (payload) =>
+      dispatch({
+        type: 'ANSWER',
+        payload: payload,
+      }),
+    saveResult: (payload) =>
+      dispatch({
+        type: 'RESULT',
+        payload: payload,
+      }),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(QuizScreen);
+
 const styles = StyleSheet.create({
+  containerr: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  box: {
+    width: 150,
+    height: 150,
+    backgroundColor: '#5AD2F4',
+  },
   container: {
     flex: 1,
     backgroundColor: '#003396',
@@ -134,8 +233,8 @@ const styles = StyleSheet.create({
   },
   questionCategory: {
     flex: 0.2,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   categoryTitle: {
     color: '#fff',
@@ -145,6 +244,7 @@ const styles = StyleSheet.create({
   },
   questionTitle: {
     flex: 0.8,
+    // backgroundColor: 'red',
   },
   title: {
     color: '#fff',
@@ -153,7 +253,8 @@ const styles = StyleSheet.create({
     fontFamily: 'AvenirNext-UltraLightItalic',
   },
   buttons: {
-    flex: 0.5,
+    // backgroundColor: 'pink',
+    flex: 0.3,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
@@ -175,5 +276,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-
-export default QuizScreen;
