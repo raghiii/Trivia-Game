@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
-import Carousel from 'react-native-snap-carousel';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {trueIcon, falseIcon, userIcon, GameIcon} from '../assets/icons';
-import ContentLoader, {Rect} from 'react-content-loader/native';
+import * as Progress from 'react-native-progress';
 
 const QuizScreen = ({
   route,
@@ -132,51 +132,46 @@ const QuizScreen = ({
             {trueIcon}
           </TouchableOpacity>
         </View>
-        {/* <View>
-          <Timerr
-            question={item}
-            index={index}
-            q={questions[currentIndex]}
-            time={time}
-            over={handleTimerOver}
-          />
-        </View> */}
       </Animated.View>
     );
   };
 
   return (
     <View style={styles.container}>
+      <View style={styles.info}>
+        <View style={styles.name}>
+          {userIcon}
+          <Text style={styles.nameText}>{route.params.value}</Text>
+        </View>
+        <View style={styles.level}>
+          {GameIcon}
+          <Text style={styles.nameText}>{level}</Text>
+        </View>
+      </View>
       {loading ? (
-        <ContentLoader backgroundColor="#fff" foregroundColor="grey" speed={2}>
-          <Rect x="50" y="300" rx="3" ry="3" width="300" height="3" />
-          <Rect x="50" y="340" rx="3" ry="3" width="240" height="3" />
-          <Rect x="50" y="380" rx="3" ry="3" width="180" height="3" />
-          <Rect x="50" y="420" rx="3" ry="3" width="130" height="3" />
-          <Rect x="50" y="460" rx="3" ry="3" width="80" height="3" />
-        </ContentLoader>
+        <View style={styles.loader}>
+          <Progress.CircleSnail size={100} color={['white']} />
+        </View>
       ) : (
-        <View>
-          <View style={styles.info}>
-            <View style={styles.name}>
-              {userIcon}
-              <Text style={styles.nameText}>{route.params.value}</Text>
-            </View>
-            <View style={styles.level}>
-              {GameIcon}
-              <Text style={styles.nameText}>{level}</Text>
-            </View>
-          </View>
+        <>
           <Carousel
             ref={ref}
-            scrollEnabled={true}
+            scrollEnabled={false}
             data={questions}
             renderItem={renderItem}
             sliderWidth={Dimensions.get('window').width}
             itemWidth={300}
             onSnapToItem={(index) => onSnap(index)}
           />
-        </View>
+          <Pagination
+            dotsLength={questions.length}
+            activeDotIndex={currentIndex}
+            containerStyle={styles.paginationStyle}
+            dotStyle={styles.dotStyle}
+            inactiveDotOpacity={0.4}
+            inactiveDotScale={0.6}
+          />
+        </>
       )}
     </View>
   );
@@ -225,7 +220,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#003366',
+    borderColor: '#fff',
   },
   name: {
     flexWrap: 'wrap',
@@ -262,7 +257,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#556AF4',
+    backgroundColor: '#003366',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -272,6 +267,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 550,
     padding: 30,
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    borderRadius: 5,
+    padding: 100,
+    borderColor: '#fff',
+    marginBottom: 100,
   },
   questionContainer: {
     flex: 1,
@@ -320,5 +325,12 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  paginationStyle: {marginBottom: 70},
+  dotStyle: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
   },
 });

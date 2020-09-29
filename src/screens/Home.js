@@ -91,14 +91,14 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
           styles.levelButton,
           {
             backgroundColor:
-              index === get(selectedLevel, 'id') ? '#556AF4' : '#fff',
+              index === get(selectedLevel, 'id') ? '#003366' : '#fff', //556AF4
           },
         ]}
         onPress={() => handleLevels(item)}>
         <Text
           style={[
             styles.levelName,
-            {color: index === get(selectedLevel, 'id') ? '#fff' : '#556AF4'},
+            {color: index === get(selectedLevel, 'id') ? '#fff' : '#003366'},
           ]}>
           {item.name}
         </Text>
@@ -109,7 +109,7 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
   return (
     <>
       <SafeAreaView
-        style={[styles.container, modalVisible ? {opacity: 0.9} : '']}>
+        style={[styles.container, modalVisible ? {opacity: 0.8} : '']}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to the Trivia Challenge!</Text>
           <View style={styles.title2}>
@@ -226,7 +226,7 @@ export default connect(null, mapDispatchToProps)(HomeScreen);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#556AF4',
+    backgroundColor: '#003366',
   },
   header: {
     marginTop: 32,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 22,
     fontWeight: '400',
-    color: '#556AF4',
+    color: '#003366',
     fontFamily: 'AvenirNext-Regular',
   },
   centeredView: {
@@ -338,24 +338,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 60,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#003396',
+    borderColor: '#003366',
   },
   startText: {
     fontSize: 24,
     fontWeight: '400',
     fontFamily: 'AvenirNext-Regular',
-    color: '#003396',
+    color: '#003366',
     textAlign: 'center',
   },
   placeholderText: {
     paddingHorizontal: 60,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#003396',
+    borderColor: '#003366',
     fontSize: 24,
     fontWeight: '400',
     fontFamily: 'AvenirNext-Regular',
-    color: '#003396',
+    color: '#003366',
     textAlign: 'center',
     marginBottom: 20,
     marginTop: 15,
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 28,
     fontWeight: '400',
-    color: '#556AF4',
+    color: '#003366',
     fontFamily: 'AvenirNext-Regular',
   },
   levelButton: {

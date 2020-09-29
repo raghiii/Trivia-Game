@@ -23,3 +23,6 @@ export const userIcon = <Icon5 name="user" size={30} color="#fff" />;
 export const GameIcon = (
   <Icon3 name="game-controller-outline" size={30} color="#fff" />
 );
+export const leaderboardIcon = (
+  <Icon1 name="leaderboard" size={30} color="#fff" />
+);

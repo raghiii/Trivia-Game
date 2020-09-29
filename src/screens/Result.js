@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,11 +7,15 @@ import {
   FlatList,
   SafeAreaView,
   TouchableOpacity,
+  Modal,
+  ScrollView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
 import {updateUserInfo, logout} from '../helpers/firebase';
-import {trueIcon, falseIcon} from '../assets/icons';
+import {trueIcon, falseIcon, leaderboardIcon} from '../assets/icons';
+import firestore from '@react-native-firebase/firestore';
 
 const Item = ({title, correct}) => (
   <View
@@ -28,10 +32,25 @@ const Item = ({title, correct}) => (
 );
 
 const Result = ({route, navigation, questions, total, answers}) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [users, setUsers] = useState([]);
   useEffect(() => {
     updateUserInfo(total);
   }, [total]);
 
+  const handleLeaderBoard = () => {
+    setModalVisible(true);
+    firestore()
+      .collection('Users')
+      .limit(10)
+      .orderBy('score', 'desc')
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((documentSnapshot) => {
+          setUsers((prev) => [...prev, documentSnapshot.data()]);
+        });
+      });
+  };
   const renderItem = ({item, index}) => {
     return (
       <Item
@@ -46,12 +65,17 @@ const Result = ({route, navigation, questions, total, answers}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>
-          {route.params.value}, You'r Score is:
-        </Text>
-        <Text style={styles.headerText}>
-          {total}/{questions.length}
-        </Text>
+        <View style={styles.scoreView}>
+          <Text style={styles.headerText}>
+            {get(route, 'params.value')}, You'r Score is: {total}/
+            {questions.length}
+          </Text>
+          <TouchableOpacity
+            style={styles.leaderBoard}
+            onPress={handleLeaderBoard}>
+            {leaderboardIcon}
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.answerContainer}>
         <FlatList
@@ -60,7 +84,7 @@ const Result = ({route, navigation, questions, total, answers}) => {
           )}
           data={questions}
           renderItem={renderItem}
-          keyExtractor={(item) => item.index}
+          keyExtractor={(item) => item.question}
         />
       </View>
       <View style={styles.footer}>
@@ -73,6 +97,34 @@ const Result = ({route, navigation, questions, total, answers}) => {
           <Text style={styles.footerText}>Play Again?</Text>
         </TouchableOpacity>
       </View>
+      <Modal transparent={true} visible={modalVisible} animationType="slide">
+        <TouchableOpacity
+          style={{flex: 1}}
+          onPress={() => {
+            setModalVisible(false);
+          }}>
+          <View>
+            <TouchableWithoutFeedback>
+              <View style={styles.leaderBoardContainer}>
+                <ScrollView>
+                  <View style={styles.firstRow}>
+                    <Text style={styles.firstRowText}>Rank</Text>
+                    <Text style={styles.firstRowText}>Name</Text>
+                    <Text style={styles.firstRowText}>Score</Text>
+                  </View>
+                  {users.map((user, index) => (
+                    <View style={styles.firstRow}>
+                      <Text style={styles.firstRowText}>{index + 1}</Text>
+                      <Text style={styles.firstRowText}>{user.name}</Text>
+                      <Text style={styles.firstRowText}>{user.score}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -90,11 +142,18 @@ export default connect(mapStateToProps, null)(Result);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#556AF4',
+    backgroundColor: '#003366',
   },
   header: {
     flex: 0.2,
+    flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scoreView: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
   headerText: {
@@ -120,8 +179,8 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   separator: {
-    height: 10,
-    backgroundColor: '#556AF4',
+    height: 8,
+    backgroundColor: '#003366',
   },
   item: {
     flexDirection: 'row',
@@ -134,7 +193,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: '#fff',
+    color: '#003366',
     fontSize: 20,
     fontWeight: '500',
     fontFamily: 'AvenirNext-Regular',
@@ -145,5 +204,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 5,
     elevation: 5,
+  },
+  leaderBoardContainer: {
+    height: 550,
+    marginTop: 150,
+    margin: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+  },
+  firstRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+    alignItems: 'center',
+    borderBottomWidth: 0.8,
+    borderBottomColor: '#003366',
+  },
+  firstRowText: {
+    color: '#003366',
+    fontSize: 20,
+    fontWeight: '500',
+    fontFamily: 'AvenirNext-Regular',
   },
 });
