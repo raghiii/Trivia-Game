@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import {useIsFocused} from '@react-navigation/native';
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,27 +11,34 @@ import {
   Modal,
   TouchableHighlight,
   FlatList,
+  TextInput,
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
 import {
-  sportsIcon,
+  natureIcon,
   computerIcon,
   brainIcon,
   geographyIcon,
   rightIcon,
 } from '../assets/icons/index.js';
-import LevelModal from '../components/modal.js';
+import {anonymousSignIn, loginStatus} from '../helpers/firebase';
 
 const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
+  const [value, onChangeText] = useState('');
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    anonymousSignIn();
+  }, [isFocused]);
 
   const handleSubmit = (category) => {
     setModalVisible(true);
     switch (category) {
-      case 'sports':
-        saveCategory(21);
+      case 'nature':
+        saveCategory(17);
         break;
       case 'general-knowledge':
         saveCategory(9);
@@ -55,9 +63,10 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
   };
 
   const handleModal = () => {
+    loginStatus(value);
     saveLevel(get(selectedLevel, 'name'));
     setModalVisible(!modalVisible);
-    navigation.navigate('QuizScreen');
+    navigation.navigate('QuizScreen', {value: value});
   };
 
   const level = [
@@ -115,10 +124,10 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
             <View style={styles.categoryContainer}>
               <TouchableOpacity
                 style={styles.categoryBackground}
-                onPress={() => handleSubmit('sports')}>
-                <View style={styles.button1}>{sportsIcon}</View>
+                onPress={() => handleSubmit('nature')}>
+                <View style={styles.button1}>{natureIcon}</View>
               </TouchableOpacity>
-              <Text style={styles.text}>Sports</Text>
+              <Text style={styles.text}>Science & Nature</Text>
             </View>
 
             <View style={styles.categoryContainer}>
@@ -131,7 +140,7 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
             </View>
           </View>
 
-          <View style={[styles.columns, styles.secondColumn]}>
+          <View style={styles.secondColumn}>
             <View style={styles.categoryContainer}>
               <TouchableOpacity
                 style={styles.categoryBackground}
@@ -155,13 +164,21 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
           <TouchableOpacity
             style={styles.defaultButton}
             onPress={() => handleSubmit('all')}>
-            <Text style={styles.footerTitle}>Play with All Categories</Text>
+            <Text style={styles.footerTitle}>Select All Categories</Text>
             {rightIcon}
           </TouchableOpacity>
         </View>
         <Modal animationType="fade" transparent={true} visible={modalVisible}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
+              <Text style={styles.modalText}>Enter your name.</Text>
+              <TextInput
+                style={styles.placeholderText}
+                onChangeText={(text) => onChangeText(text)}
+                value={value}
+                placeholder="Name"
+                placeholderTextColor="#003396"
+              />
               <Text style={styles.modalText}>Choose difficulty!</Text>
               <View style={styles.contentContainer}>
                 <FlatList
@@ -219,7 +236,7 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 10,
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
     color: '#fff',
     fontFamily: 'AvenirNext-Regular',
   },
@@ -251,7 +268,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondColumn: {
-    paddingTop: 80,
+    flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingTop: 100,
   },
   categoryBackground: {
     backgroundColor: '#fff',
@@ -261,10 +281,7 @@ const styles = StyleSheet.create({
       ) / 2,
     padding: 15,
   },
-  button1: {
-    bottom: 20,
-    right: 30,
-  },
+  button1: {},
   button4: {
     bottom: 0,
     left: 20,
@@ -330,16 +347,29 @@ const styles = StyleSheet.create({
     color: '#003396',
     textAlign: 'center',
   },
-  modalText: {
-    marginBottom: 15,
+  placeholderText: {
+    paddingHorizontal: 60,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#003396',
+    fontSize: 24,
+    fontWeight: '400',
+    fontFamily: 'AvenirNext-Regular',
+    color: '#003396',
     textAlign: 'center',
-    fontSize: 26,
+    marginBottom: 20,
+    marginTop: 15,
+    width: 200,
+  },
+  modalText: {
+    textAlign: 'center',
+    fontSize: 28,
     fontWeight: '400',
     color: '#556AF4',
     fontFamily: 'AvenirNext-Regular',
   },
   levelButton: {
-    marginVertical: 10,
+    marginVertical: 5,
   },
   levelName: {
     fontSize: 24,
@@ -349,6 +379,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   contentContainer: {
-    height: 200,
+    height: 150,
   },
 });

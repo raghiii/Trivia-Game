@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>918250109591-hpi1e78t5tf5dm9qrlg1786ulgmh8eqh.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.918250109591-hpi1e78t5tf5dm9qrlg1786ulgmh8eqh</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAVNiw4RNRt9uBVL9UDCbPMDcW1Qc0uuFw</string>
+	<key>GCM_SENDER_ID</key>
+	<string>918250109591</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>org.reactjs.native.example.TriviaGame</string>
+	<key>PROJECT_ID</key>
+	<string>trivia-game-d1eb4</string>
+	<key>STORAGE_BUCKET</key>
+	<string>trivia-game-d1eb4.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:918250109591:ios:8223142681b042f65b87d2</string>
+	<key>DATABASE_URL</key>
+	<string>https://trivia-game-d1eb4.firebaseio.com</string>
+</dict>
+</plist>

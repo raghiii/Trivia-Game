@@ -6,16 +6,15 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
-  Easing,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import {connect} from 'react-redux';
-import {get, isequal} from 'lodash';
-import Carousel, {Pagination} from 'react-native-snap-carousel';
-import {trueIcon, falseIcon} from '../assets/icons';
-import Timerr from '../components/timer';
+import get from 'lodash/get';
+import Carousel from 'react-native-snap-carousel';
+import {trueIcon, falseIcon, userIcon, GameIcon} from '../assets/icons';
+import ContentLoader, {Rect} from 'react-content-loader/native';
 
 const QuizScreen = ({
+  route,
   navigation,
   category,
   level,
@@ -31,7 +30,7 @@ const QuizScreen = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [time, setTime] = useState(10);
-  const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getQuestions();
@@ -45,10 +44,12 @@ const QuizScreen = ({
 
       let response = await fetch(url);
       let resp = await response.json();
+      setLoading(false);
       setQuestions(get(resp, 'results'));
       saveQuestions(get(resp, 'results'));
     } catch (error) {
       console.error(error);
+      setLoading(false);
     }
   };
 
@@ -58,7 +59,6 @@ const QuizScreen = ({
 
   useEffect(() => {
     saveSubmittedAnswer(submittedAnswers);
-    // ref.current.snapToNext();
   }, [submittedAnswers]);
 
   const validateAnswer = (answer, index) => {
@@ -67,11 +67,11 @@ const QuizScreen = ({
       setTotal(total + 1);
     }
     if (index + 1 === questions.length) {
-      navigation.navigate('ResultScreen');
+      navigation.navigate('ResultScreen', {value: route.params.value});
     }
   };
 
-  const abcd = (index) => {
+  const onSnap = (index) => {
     setCurrentIndex(index);
     setTime(10);
   };
@@ -80,16 +80,11 @@ const QuizScreen = ({
     setbgColor(color);
     Animated.timing(animation, {
       toValue: 1,
-      duration: 1000,
+      duration: 500,
+      useNativeDriver: false,
     }).start(() => {
       ref.current.snapToNext();
       animation.setValue(0);
-      // Animated.timing(animation, {
-      //   toValue: 0,
-      //   duration: 1000,
-      // }).start(() => {
-      //   ref.current.snapToNext();
-      // });
     });
   };
 
@@ -98,15 +93,13 @@ const QuizScreen = ({
     outputRange: ['#003366', bgColor],
   });
 
-  console.log('##test', currentIndex, get(ref, 'current.currentIndex'));
   const animatedStyle = {
     backgroundColor: boxInterpolation,
   };
 
   const handleTimerOver = () => {
-    console.log('##handleTimerOver');
     ref.current.snapToNext();
-    setTime(20);
+    setTime(10);
   };
   const renderItem = ({item, index}) => {
     return (
@@ -114,8 +107,6 @@ const QuizScreen = ({
         <View style={styles.questionContainer}>
           <View style={styles.questionCategory}>
             <Text style={styles.categoryTitle}>{item.category}</Text>
-            <Text style={styles.categoryTitle}>{item.correct_answer}</Text>
-            <Text style={styles.categoryTitle}>{item.difficulty}</Text>
           </View>
           <View style={styles.questionTitle}>
             <Text style={styles.title}>
@@ -156,15 +147,37 @@ const QuizScreen = ({
 
   return (
     <View style={styles.container}>
-      <Carousel
-        ref={ref}
-        scrollEnabled={false}
-        data={questions}
-        renderItem={renderItem}
-        sliderWidth={Dimensions.get('window').width}
-        itemWidth={300}
-        onSnapToItem={(index) => abcd(index)}
-      />
+      {loading ? (
+        <ContentLoader backgroundColor="#fff" foregroundColor="grey" speed={2}>
+          <Rect x="50" y="300" rx="3" ry="3" width="300" height="3" />
+          <Rect x="50" y="340" rx="3" ry="3" width="240" height="3" />
+          <Rect x="50" y="380" rx="3" ry="3" width="180" height="3" />
+          <Rect x="50" y="420" rx="3" ry="3" width="130" height="3" />
+          <Rect x="50" y="460" rx="3" ry="3" width="80" height="3" />
+        </ContentLoader>
+      ) : (
+        <View>
+          <View style={styles.info}>
+            <View style={styles.name}>
+              {userIcon}
+              <Text style={styles.nameText}>{route.params.value}</Text>
+            </View>
+            <View style={styles.level}>
+              {GameIcon}
+              <Text style={styles.nameText}>{level}</Text>
+            </View>
+          </View>
+          <Carousel
+            ref={ref}
+            scrollEnabled={true}
+            data={questions}
+            renderItem={renderItem}
+            sliderWidth={Dimensions.get('window').width}
+            itemWidth={300}
+            onSnapToItem={(index) => onSnap(index)}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -202,6 +215,40 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(mapStateToProps, mapDispatchToProps)(QuizScreen);
 
 const styles = StyleSheet.create({
+  info: {
+    backgroundColor: '#003366',
+    marginTop: 70,
+    flexDirection: 'row',
+    marginHorizontal: 50,
+    borderRadius: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#003366',
+  },
+  name: {
+    flexWrap: 'wrap',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: '#fff',
+  },
+  nameText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '400',
+    fontFamily: 'AvenirNext-Regular',
+    marginLeft: 10,
+  },
+  level: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   containerr: {
     flex: 1,
     backgroundColor: '#fff',
@@ -215,15 +262,15 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#003396',
+    backgroundColor: '#556AF4',
     justifyContent: 'center',
     alignItems: 'center',
   },
   slide: {
-    marginTop: 100,
+    marginTop: 70,
     backgroundColor: '#003366',
     borderRadius: 5,
-    height: 500,
+    height: 550,
     padding: 30,
   },
   questionContainer: {
@@ -238,22 +285,21 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     fontFamily: 'AvenirNext-Regular',
   },
   questionTitle: {
     flex: 0.8,
-    // backgroundColor: 'red',
+    justifyContent: 'center',
   },
   title: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '300',
     fontFamily: 'AvenirNext-UltraLightItalic',
   },
   buttons: {
-    // backgroundColor: 'pink',
     flex: 0.3,
     flexDirection: 'row',
     justifyContent: 'space-evenly',

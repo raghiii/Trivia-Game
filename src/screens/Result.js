@@ -1,20 +1,17 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useEffect} from 'react';
 import {
   StyleSheet,
   Text,
   View,
   FlatList,
-  Platform,
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
 import {connect} from 'react-redux';
-import {get} from 'lodash';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Icon2 from 'react-native-vector-icons/Entypo';
-
-const trueIcon = <Icon name="checkmark" size={30} color="#fff" />;
-const falseIcon = <Icon2 name="cross" size={30} color="#fff" />;
+import get from 'lodash/get';
+import {updateUserInfo, logout} from '../helpers/firebase';
+import {trueIcon, falseIcon} from '../assets/icons';
 
 const Item = ({title, correct}) => (
   <View
@@ -31,9 +28,11 @@ const Item = ({title, correct}) => (
 );
 
 const Result = ({route, navigation, questions, total, answers}) => {
-  console.log('##answers', answers, total);
+  useEffect(() => {
+    updateUserInfo(total);
+  }, [total]);
+
   const renderItem = ({item, index}) => {
-    // console.log('##index', index, get(answers[index], 'answer'));
     return (
       <Item
         title={item.question.replace(/(&quot\;)/g, '"')}
@@ -47,7 +46,9 @@ const Result = ({route, navigation, questions, total, answers}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>You Scored!</Text>
+        <Text style={styles.headerText}>
+          {route.params.value}, You'r Score is:
+        </Text>
         <Text style={styles.headerText}>
           {total}/{questions.length}
         </Text>
@@ -55,22 +56,18 @@ const Result = ({route, navigation, questions, total, answers}) => {
       <View style={styles.answerContainer}>
         <FlatList
           ItemSeparatorComponent={({highlighted}) => (
-            <View style={[styles.separator, highlighted]}>
-              {/* <Text>rv</Text> */}
-            </View>
-            // <View style={styles.separator}>
-            //   <Text>rv</Text>
-            // </View>
+            <View style={[styles.separator, highlighted]} />
           )}
           data={questions}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.index}
         />
       </View>
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.playagainButton}
           onPress={() => {
+            logout();
             navigation.navigate('Home');
           }}>
           <Text style={styles.footerText}>Play Again?</Text>
@@ -93,27 +90,24 @@ export default connect(mapStateToProps, null)(Result);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
     backgroundColor: '#556AF4',
   },
   header: {
     flex: 0.2,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: 'pink',
   },
   headerText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '600',
     fontFamily: 'AvenirNext-Regular',
+    marginTop: 15,
   },
   footer: {
     flex: 0.2,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: 'pink',
   },
   footerText: {
     color: '#fff',
@@ -124,12 +118,10 @@ const styles = StyleSheet.create({
   answerContainer: {
     flex: 1,
     padding: 30,
-    // backgroundColor: 'lightgreen',
   },
   separator: {
-    // flex: 1,
     height: 10,
-    backgroundColor: '#003396',
+    backgroundColor: '#556AF4',
   },
   item: {
     flexDirection: 'row',
@@ -140,12 +132,11 @@ const styles = StyleSheet.create({
   },
   answerView: {
     flex: 1,
-    // backgroundColor: 'red',
   },
   title: {
     color: '#fff',
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '500',
     fontFamily: 'AvenirNext-Regular',
   },
   boxWithShadow: {
