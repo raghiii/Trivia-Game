@@ -5,9 +5,9 @@ import {createStore} from 'redux';
 import rootReducer from './src/reducer';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import HomeScreen from './src/screens/Home.js';
-import QuizScreen from './src/screens/Quiz.js';
-import ResultScreen from './src/screens/Result.js';
+import HomeScreen from './src/screens/Home';
+import QuizScreen from './src/screens/Quiz';
+import ResultScreen from './src/screens/Result';
 
 const store = createStore(rootReducer);
 

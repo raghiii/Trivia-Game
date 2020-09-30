@@ -1,7 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   FlatList,
@@ -13,9 +12,10 @@ import {
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
-import {updateUserInfo, logout} from '../helpers/firebase';
-import {trueIcon, falseIcon, leaderboardIcon} from '../assets/icons';
+import {updateUserInfo, logout} from '../../helpers/firebase';
+import {trueIcon, falseIcon, leaderboardIcon} from '../../assets/icons';
 import firestore from '@react-native-firebase/firestore';
+import {styles} from './styles.js';
 
 const Item = ({title, correct}) => (
   <View
@@ -108,12 +108,12 @@ const Result = ({route, navigation, questions, total, answers}) => {
               <View style={styles.leaderBoardContainer}>
                 <ScrollView>
                   <View style={styles.firstRow}>
-                    <Text style={styles.firstRowText}>Rank</Text>
-                    <Text style={styles.firstRowText}>Name</Text>
-                    <Text style={styles.firstRowText}>Score</Text>
+                    <Text style={styles.firstRowText}>RANK</Text>
+                    <Text style={styles.firstRowText}>NAME</Text>
+                    <Text style={styles.firstRowText}>SCORE</Text>
                   </View>
                   {users.map((user, index) => (
-                    <View style={styles.firstRow}>
+                    <View style={styles.firstRow} key={index}>
                       <Text style={styles.firstRowText}>{index + 1}</Text>
                       <Text style={styles.firstRowText}>{user.name}</Text>
                       <Text style={styles.firstRowText}>{user.score}</Text>
@@ -138,93 +138,3 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps, null)(Result);
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#003366',
-  },
-  header: {
-    flex: 0.2,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scoreView: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  headerText: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '600',
-    fontFamily: 'AvenirNext-Regular',
-    marginTop: 15,
-  },
-  footer: {
-    flex: 0.2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footerText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '600',
-    fontFamily: 'AvenirNext-Regular',
-  },
-  answerContainer: {
-    flex: 1,
-    padding: 30,
-  },
-  separator: {
-    height: 8,
-    backgroundColor: '#003366',
-  },
-  item: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-  },
-  answerView: {
-    flex: 1,
-  },
-  title: {
-    color: '#003366',
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'AvenirNext-Regular',
-  },
-  boxWithShadow: {
-    shadowColor: '#fff',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  leaderBoardContainer: {
-    height: 550,
-    marginTop: 150,
-    margin: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-  },
-  firstRow: {
-    marginTop: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-    alignItems: 'center',
-    borderBottomWidth: 0.8,
-    borderBottomColor: '#003366',
-  },
-  firstRowText: {
-    color: '#003366',
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'AvenirNext-Regular',
-  },
-});

@@ -1,0 +1,160 @@
+import {StyleSheet, Dimensions} from 'react-native';
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#003366',
+  },
+  header: {
+    marginTop: 32,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  title: {
+    marginTop: 10,
+    fontSize: 24,
+    fontWeight: '500',
+    color: '#fff',
+    fontFamily: 'AvenirNext-Regular',
+  },
+  title2: {
+    marginTop: 35,
+  },
+  title3: {
+    fontSize: 20,
+    fontWeight: '400',
+    color: '#fff',
+  },
+  title4: {
+    fontSize: 34,
+    color: '#fff',
+    fontFamily: 'AvenirNext-Regular',
+    fontWeight: '600',
+  },
+  body: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 30,
+  },
+  columns: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  categoryContainer: {
+    alignItems: 'center',
+  },
+  secondColumn: {
+    flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  categoryBackground: {
+    backgroundColor: '#fff',
+    borderRadius:
+      Math.round(
+        Dimensions.get('window').width + Dimensions.get('window').height,
+      ) / 2,
+    padding: 15,
+  },
+  button1: {},
+  button4: {
+    bottom: 0,
+    left: 20,
+  },
+  text: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'AvenirNext-Regular',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  footer: {
+    flex: 0.2,
+    marginTop: 32,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  defaultButton: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    flexDirection: 'row',
+  },
+  footerTitle: {
+    fontSize: 22,
+    fontWeight: '400',
+    color: '#003366',
+    fontFamily: 'AvenirNext-Regular',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  startButton: {
+    marginTop: 20,
+    paddingHorizontal: 60,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#003366',
+  },
+  startText: {
+    fontSize: 24,
+    fontWeight: '400',
+    fontFamily: 'AvenirNext-Regular',
+    color: '#003366',
+    textAlign: 'center',
+  },
+  placeholderText: {
+    paddingHorizontal: 60,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#003366',
+    fontSize: 24,
+    fontWeight: '400',
+    fontFamily: 'AvenirNext-Regular',
+    color: '#003366',
+    textAlign: 'center',
+    marginBottom: 20,
+    marginTop: 15,
+    width: 200,
+  },
+  modalText: {
+    textAlign: 'center',
+    fontSize: 28,
+    fontWeight: '400',
+    color: '#003366',
+    fontFamily: 'AvenirNext-Regular',
+  },
+  levelButton: {
+    marginVertical: 5,
+  },
+  levelName: {
+    fontSize: 24,
+    fontWeight: '400',
+    fontFamily: 'AvenirNext-Regular',
+    padding: 5,
+    textAlign: 'center',
+  },
+  contentContainer: {
+    height: 150,
+  },
+});

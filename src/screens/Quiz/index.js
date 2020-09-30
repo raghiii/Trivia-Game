@@ -1,17 +1,17 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {
-  StyleSheet,
   View,
   Text,
-  TouchableOpacity,
   Dimensions,
   Animated,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
-import {trueIcon, falseIcon, userIcon, GameIcon} from '../assets/icons';
+import {trueIcon, falseIcon, userIcon, GameIcon} from '../../assets/icons';
 import * as Progress from 'react-native-progress';
+import {styles} from './styles.js';
 
 const QuizScreen = ({
   route,
@@ -80,7 +80,7 @@ const QuizScreen = ({
     setbgColor(color);
     Animated.timing(animation, {
       toValue: 1,
-      duration: 500,
+      duration: 800,
       useNativeDriver: false,
     }).start(() => {
       ref.current.snapToNext();
@@ -93,17 +93,17 @@ const QuizScreen = ({
     outputRange: ['#003366', bgColor],
   });
 
-  const animatedStyle = {
-    backgroundColor: boxInterpolation,
-  };
-
   const handleTimerOver = () => {
     ref.current.snapToNext();
     setTime(10);
   };
   const renderItem = ({item, index}) => {
     return (
-      <Animated.View style={{...styles.slide, ...animatedStyle}}>
+      <Animated.View
+        style={{
+          ...styles.slide,
+          backgroundColor: index === currentIndex ? boxInterpolation : '',
+        }}>
         <View style={styles.questionContainer}>
           <View style={styles.questionCategory}>
             <Text style={styles.categoryTitle}>{item.category}</Text>
@@ -115,22 +115,21 @@ const QuizScreen = ({
           </View>
         </View>
         <View style={styles.buttons}>
-          <TouchableOpacity
-            style={styles.falseButton}
+          <TouchableWithoutFeedback
             onPress={() => {
               handleAnimation('lightcoral');
               validateAnswer('false', index);
             }}>
-            {falseIcon}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.trueButton}
+            <View style={styles.falseButton}>{falseIcon}</View>
+          </TouchableWithoutFeedback>
+
+          <TouchableWithoutFeedback
             onPress={() => {
               handleAnimation('lightgreen');
               validateAnswer('true', index);
             }}>
-            {trueIcon}
-          </TouchableOpacity>
+            <View style={styles.trueButton}>{trueIcon}</View>
+          </TouchableWithoutFeedback>
         </View>
       </Animated.View>
     );
@@ -162,6 +161,8 @@ const QuizScreen = ({
             sliderWidth={Dimensions.get('window').width}
             itemWidth={300}
             onSnapToItem={(index) => onSnap(index)}
+            initialNumToRender={1}
+            windowSize={1}
           />
           <Pagination
             dotsLength={questions.length}
@@ -183,7 +184,7 @@ const mapStateToProps = (state) => {
     questions: state.questions,
     answers: state.submittedAnswers,
     category: state.category,
-    level: state.level,
+    level: get(state, 'level', 'easy'),
   };
 };
 
@@ -208,129 +209,3 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(QuizScreen);
-
-const styles = StyleSheet.create({
-  info: {
-    backgroundColor: '#003366',
-    marginTop: 70,
-    flexDirection: 'row',
-    marginHorizontal: 50,
-    borderRadius: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#fff',
-  },
-  name: {
-    flexWrap: 'wrap',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderRightColor: '#fff',
-  },
-  nameText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '400',
-    fontFamily: 'AvenirNext-Regular',
-    marginLeft: 10,
-  },
-  level: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  containerr: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    width: 150,
-    height: 150,
-    backgroundColor: '#5AD2F4',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#003366',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  slide: {
-    marginTop: 70,
-    backgroundColor: '#003366',
-    borderRadius: 5,
-    height: 550,
-    padding: 30,
-    borderWidth: 1,
-    borderColor: '#fff',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    borderRadius: 5,
-    padding: 100,
-    borderColor: '#fff',
-    marginBottom: 100,
-  },
-  questionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  questionCategory: {
-    flex: 0.2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  categoryTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '600',
-    fontFamily: 'AvenirNext-Regular',
-  },
-  questionTitle: {
-    flex: 0.8,
-    justifyContent: 'center',
-  },
-  title: {
-    color: '#fff',
-    fontSize: 26,
-    fontWeight: '300',
-    fontFamily: 'AvenirNext-UltraLightItalic',
-  },
-  buttons: {
-    flex: 0.3,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  falseButton: {
-    backgroundColor: 'lightcoral',
-    height: 70,
-    width: 70,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trueButton: {
-    backgroundColor: 'lightgreen',
-    height: 70,
-    width: 70,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paginationStyle: {marginBottom: 70},
-  dotStyle: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-  },
-});
