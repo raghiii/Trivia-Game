@@ -1,5 +1,7 @@
 # Trivia Game Coding Challenge
 
+![](trivia-game.gif)
+
 ## Overview
 
 Your challenge is to create a simple, 10 question, true or false, trivia app in the technology you are applying to work in. While the problem you are working on is simple, you should treat this like a real world application. This is a chance to show off your abilities and impress.
