@@ -7,21 +7,27 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Modal,
-  ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
 import {updateUserInfo, logout} from '../../helpers/firebase';
-import {trueIcon, falseIcon, leaderboardIcon} from '../../assets/icons';
+import {
+  trueIcon,
+  falseIcon,
+  leaderboardIcon,
+  trophyIcon,
+  downIcon,
+} from '../../assets/icons';
 import firestore from '@react-native-firebase/firestore';
 import {styles} from './styles.js';
+import {colors} from '../../assets/colors';
+import * as Progress from 'react-native-progress';
 
 const Item = ({title, correct}) => (
   <View
     style={[
       styles.item,
-      styles.boxWithShadow,
       {backgroundColor: correct ? 'lightgreen' : 'lightcoral'},
     ]}>
     <View style={styles.answerView}>
@@ -34,22 +40,26 @@ const Item = ({title, correct}) => (
 const Result = ({route, navigation, questions, total, answers}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     updateUserInfo(total);
   }, [total]);
 
   const handleLeaderBoard = () => {
     setModalVisible(true);
-    firestore()
-      .collection('Users')
-      .limit(10)
-      .orderBy('score', 'desc')
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((documentSnapshot) => {
-          setUsers((prev) => [...prev, documentSnapshot.data()]);
+    if (users.length === 0) {
+      firestore()
+        .collection('Users')
+        .limit(10)
+        .orderBy('score', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((documentSnapshot) => {
+            setUsers((prev) => [...prev, documentSnapshot.data()]);
+          });
+          setLoading(false);
         });
-      });
+    }
   };
   const renderItem = ({item, index}) => {
     return (
@@ -62,22 +72,48 @@ const Result = ({route, navigation, questions, total, answers}) => {
     );
   };
 
+  const renderLeaderBoard = ({item, index}) => {
+    return (
+      <View style={styles.firstRow}>
+        <View style={styles.cell}>
+          <Text style={styles.remainingText}>{index + 1}</Text>
+        </View>
+        <View style={styles.cell}>
+          <Text style={styles.remainingText}>
+            {item.name ? item.name : 'player'}
+          </Text>
+        </View>
+        <View style={styles.cell}>
+          <Text style={styles.remainingText}>{item.score}</Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, modalVisible ? {opacity: 0.9} : '']}>
       <View style={styles.header}>
         <View style={styles.scoreView}>
           <Text style={styles.headerText}>
             {get(route, 'params.value')}, You'r Score is: {total}/
             {questions.length}
           </Text>
-          <TouchableOpacity
-            style={styles.leaderBoard}
-            onPress={handleLeaderBoard}>
-            {leaderboardIcon}
-          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.answerContainer}>
+        <View style={styles.top}>
+          <View style={styles.leaderBoard}>
+            {downIcon}
+            <Text style={styles.topText}>Correct Answers</Text>
+          </View>
+          <View style={styles.leaderBoard}>
+            <TouchableOpacity onPress={handleLeaderBoard}>
+              {leaderboardIcon}
+            </TouchableOpacity>
+            <Text style={styles.topText}>Leaderboard</Text>
+          </View>
+        </View>
         <FlatList
           ItemSeparatorComponent={({highlighted}) => (
             <View style={[styles.separator, highlighted]} />
@@ -106,20 +142,23 @@ const Result = ({route, navigation, questions, total, answers}) => {
           <View>
             <TouchableWithoutFeedback>
               <View style={styles.leaderBoardContainer}>
-                <ScrollView>
-                  <View style={styles.firstRow}>
-                    <Text style={styles.firstRowText}>RANK</Text>
-                    <Text style={styles.firstRowText}>NAME</Text>
-                    <Text style={styles.firstRowText}>SCORE</Text>
+                <View style={styles.trophy}>{trophyIcon}</View>
+                <View style={styles.firstRow}>
+                  <Text style={styles.firstRowText}>Rank</Text>
+                  <Text style={styles.firstRowText}>Name</Text>
+                  <Text style={styles.firstRowText}>Score</Text>
+                </View>
+                {loading ? (
+                  <View style={styles.loader}>
+                    <Progress.CircleSnail size={100} color={[colors.purple]} />
                   </View>
-                  {users.map((user, index) => (
-                    <View style={styles.firstRow} key={index}>
-                      <Text style={styles.firstRowText}>{index + 1}</Text>
-                      <Text style={styles.firstRowText}>{user.name}</Text>
-                      <Text style={styles.firstRowText}>{user.score}</Text>
-                    </View>
-                  ))}
-                </ScrollView>
+                ) : (
+                  <FlatList
+                    data={users}
+                    renderItem={renderLeaderBoard}
+                    keyExtractor={(item, index) => 'key' + index}
+                  />
+                )}
               </View>
             </TouchableWithoutFeedback>
           </View>

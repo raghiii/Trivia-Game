@@ -5,12 +5,14 @@ import {
   Dimensions,
   Animated,
   TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {trueIcon, falseIcon, userIcon, GameIcon} from '../../assets/icons';
 import * as Progress from 'react-native-progress';
+import {colors} from '../../assets/colors';
 import {styles} from './styles.js';
 
 const QuizScreen = ({
@@ -26,7 +28,7 @@ const QuizScreen = ({
   const [questions, setQuestions] = useState([]);
   const [submittedAnswers, setSubmittedAnswers] = useState([]);
   const [total, setTotal] = useState(0);
-  const [bgColor, setbgColor] = useState('#003366');
+  const [bgColor, setbgColor] = useState(colors.darkBlue);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [time, setTime] = useState(10);
@@ -67,7 +69,9 @@ const QuizScreen = ({
       setTotal(total + 1);
     }
     if (index + 1 === questions.length) {
-      navigation.navigate('ResultScreen', {value: route.params.value});
+      navigation.navigate('ResultScreen', {
+        value: get(route, ['params', 'value'], 'player'),
+      });
     }
   };
 
@@ -90,7 +94,7 @@ const QuizScreen = ({
 
   const boxInterpolation = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#003366', bgColor],
+    outputRange: [colors.darkBlue, bgColor],
   });
 
   const handleTimerOver = () => {
@@ -136,45 +140,50 @@ const QuizScreen = ({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.info}>
-        <View style={styles.name}>
-          {userIcon}
-          <Text style={styles.nameText}>{route.params.value}</Text>
+    <>
+      <StatusBar backgroundColor={colors.darkBlue} barStyle={'light-content'} />
+      <View style={styles.container}>
+        <View style={styles.info}>
+          <View style={styles.name}>
+            {userIcon}
+            <Text style={styles.nameText}>
+              {get(route, ['params', 'value'], 'player')}
+            </Text>
+          </View>
+          <View style={styles.level}>
+            {GameIcon}
+            <Text style={styles.nameText}>{level}</Text>
+          </View>
         </View>
-        <View style={styles.level}>
-          {GameIcon}
-          <Text style={styles.nameText}>{level}</Text>
-        </View>
+        {loading ? (
+          <View style={styles.loader}>
+            <Progress.CircleSnail size={100} color={[colors.white]} />
+          </View>
+        ) : (
+          <>
+            <Carousel
+              ref={ref}
+              scrollEnabled={false}
+              data={questions}
+              renderItem={renderItem}
+              sliderWidth={Dimensions.get('window').width}
+              itemWidth={300}
+              onSnapToItem={(index) => onSnap(index)}
+              initialNumToRender={1}
+              windowSize={1}
+            />
+            <Pagination
+              dotsLength={questions.length}
+              activeDotIndex={currentIndex}
+              containerStyle={styles.paginationStyle}
+              dotStyle={styles.dotStyle}
+              inactiveDotOpacity={0.4}
+              inactiveDotScale={0.6}
+            />
+          </>
+        )}
       </View>
-      {loading ? (
-        <View style={styles.loader}>
-          <Progress.CircleSnail size={100} color={['white']} />
-        </View>
-      ) : (
-        <>
-          <Carousel
-            ref={ref}
-            scrollEnabled={false}
-            data={questions}
-            renderItem={renderItem}
-            sliderWidth={Dimensions.get('window').width}
-            itemWidth={300}
-            onSnapToItem={(index) => onSnap(index)}
-            initialNumToRender={1}
-            windowSize={1}
-          />
-          <Pagination
-            dotsLength={questions.length}
-            activeDotIndex={currentIndex}
-            containerStyle={styles.paginationStyle}
-            dotStyle={styles.dotStyle}
-            inactiveDotOpacity={0.4}
-            inactiveDotScale={0.6}
-          />
-        </>
-      )}
-    </View>
+    </>
   );
 };
 

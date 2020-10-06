@@ -10,6 +10,7 @@ import {
   TouchableHighlight,
   FlatList,
   TextInput,
+  StatusBar,
 } from 'react-native';
 import {connect} from 'react-redux';
 import get from 'lodash/get';
@@ -20,6 +21,7 @@ import {
   geographyIcon,
   rightIcon,
 } from '../../assets/icons/index.js';
+import {colors} from '../../assets/colors';
 import {styles} from './styles.js';
 import {anonymousSignIn, loginStatus} from '../../helpers/firebase';
 
@@ -90,14 +92,21 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
           styles.levelButton,
           {
             backgroundColor:
-              index === get(selectedLevel, 'id') ? '#003366' : '#fff', //556AF4
+              index === get(selectedLevel, 'id')
+                ? colors.darkBlue
+                : colors.white,
           },
         ]}
         onPress={() => handleLevels(item)}>
         <Text
           style={[
             styles.levelName,
-            {color: index === get(selectedLevel, 'id') ? '#fff' : '#003366'},
+            {
+              color:
+                index === get(selectedLevel, 'id')
+                  ? colors.white
+                  : colors.darkBlue,
+            },
           ]}>
           {item.name}
         </Text>
@@ -107,6 +116,7 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
 
   return (
     <>
+      <StatusBar backgroundColor={colors.darkBlue} barStyle={'light-content'} />
       <SafeAreaView
         style={[styles.container, modalVisible ? {opacity: 0.8} : '']}>
         <View style={styles.header}>
@@ -170,15 +180,15 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
         <Modal animationType="fade" transparent={true} visible={modalVisible}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Enter your name.</Text>
+              <Text style={styles.modalText}>Your Name</Text>
               <TextInput
                 style={styles.placeholderText}
                 onChangeText={(text) => onChangeText(text)}
                 value={value}
-                placeholder="Name"
-                placeholderTextColor="#003396"
+                placeholder="name"
+                placeholderTextColor={colors.grey}
               />
-              <Text style={styles.modalText}>Choose difficulty!</Text>
+              <Text style={styles.modalText}>Choose difficulty</Text>
               <View style={styles.contentContainer}>
                 <FlatList
                   keyExtractor={(item) => item.name}
@@ -195,7 +205,7 @@ const HomeScreen = ({navigation, saveCategory, saveLevel}) => {
                   setModalVisible(!modalVisible);
                   handleModal();
                 }}>
-                <Text style={styles.startText}>Start...</Text>
+                <Text style={styles.startText}>START</Text>
               </TouchableHighlight>
             </View>
           </View>
