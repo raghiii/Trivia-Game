@@ -1,6 +1,6 @@
 # Trivia Game Coding Challenge
 
-![](trivia-game.gif)
+![](quiz.gif)
 
 ## Overview
 
